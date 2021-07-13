@@ -1,0 +1,66 @@
+*TITLE=ZXCT1082 MACROMODEL
+*ORIGIN=DZSL_AG_GS
+*SIMULATOR=DIODES, SIMETRIX and PSPICE
+*DATE=1st Sept 2011
+*VERSION=2
+*PIN_ORDER   1:OUT  2:GND, 3:S+, 4:S-, 5:VCC
+
+*Does not include temperature dependence of offset error, gain or input current.
+*Includes roughly approximated temperature effect of low voltage operating knee of VS- and VCC. 
+
+.subckt ZXCT1082 OUT GND  S+  S- VCC
+* pins------------1---2---3---4---5
+      
+.PARAM VTH1 = {1-0.004*(TEMP-25)}
+.PARAM KG ={1e-4/(2-VTH1)**2} ; rnom/(VON-VTH1)^2
+D1  S+ 1 DHM
+D2  1  S- DHM
+D3  S- 2 DHM
+D4  2  S+ DHM
+D7  GND VCC DHM
+D8  GND S- DHM
+D9  GND S+ DHM
+
+*input current typ 1.7uA at Vcc=VS+=12V
+G1  S+ GND value={(1.4u+((V(VCC)-V(GND)-4)/42e6)+((V(S+)-V(GND))/6e8))
++ *0.25*(1+tanh(10*(V(VCC)-V(GND)-3.5)))*(1+tanh(20*(V(S+)-V(GND)-1)))}
+G2  S- GND value={(1.4u+((V(VCC)-V(GND)-4)/42e6)+((V(S+)-V(GND))/6e8))
++ *0.25*(1+tanh(10*(V(VCC)-V(GND)-3.5)))*(1+tanh(20*(V(S+)-V(GND)-1)))}
+R1  S+ FILT 10k      ;input filter
+C1  FILT S- 1pf       ;input filter 
+R2  VCC GND  3.75Meg   ;Vcc quiescent current, typ 16uA at 60V
+G3  S- SIN VALUE={0.1*((1+tanh(10*(V(S-)-V(FILT))))*tanh(50*max(V(S-)-V(SIN),0))
++ +(-1+tanh(10*(V(S-)-V(FILT))))*tanh(50*max(V(SIN)-V(GND),0)))
++ *tanh(20*max(V(VCC)-VTH1,0))}
+C5  S- GND 3p
+C6  S+ GND 2p
+C4  SIN FILT 100f
+R3  S+ SIN 1G
+C2  SIN S+ 500f
+R6  S+ S+A 1k
+G4  S+A OUT VALUE={KG*(max(V(S+A)-V(SIN)-VTH1,0)**2)*(V(S+A)-V(OUT))}
+R4  S+ OUT 8G
+C3  SIN OUT 80f
+C7  OUT GND 1.25p
+* zener diode
+D5  SIN S+ DHM
+D6  S+  Z1 DHM
+I1  SIN Z1 0.192
+RZ  Z1 SIN 100
+
+.model DHM D IS=6.3E-16 BV=65
+.ends ZXCT1082
+*
+*                (c)  2011 Diodes Incorporated
+*
+*   The copyright in these models  and  the designs embodied belong
+*   to Diodes Incorporated (" Diodes ").  They  are  supplied
+*   free of charge by Diodes for the purpose of research and design
+*   and may be used or copied intact  (including this notice)  for
+*   that purpose only.  All other rights are reserved.  The models
+*   are believed accurate but no condition or warranty as to their
+*   merchantability or fitness for purpose is given and no liability
+*   in respect of any use is accepted by Diodes Incorporated, its distributors
+*   or agents.
+*
+*   Diodes Incorporated, 4949 Hedgcoxe Road, Suite 200, Plano, TX 75024, USA

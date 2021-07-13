@@ -1,0 +1,10 @@
+*load regulation
+.include ../AE01.01.01.175.cir
+.param VSOURCE=60
+.param ILOAD=1
+.param VSUPPLY=5
+;.param Rsense=0.1
+;.param RGT=2.74K
+;.param RG=68.1K
+.dc I1 0 {ILOAD} 0.001
+

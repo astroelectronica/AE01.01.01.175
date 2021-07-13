@@ -1,0 +1,26 @@
+*load regulation
+*
+*load
+*
+*max current of load
+.meas iload_max max I(I1)
+*max voltage of load
+.meas vload_max max V(/pwr_out)
+*max power of load
+.meas pload_max param (iload_max*vload_max)
+*
+*sense resistors
+*
+*max voltage sense resistors
+.meas vsense_max max V(/pwr_in,/pwr_out)
+*max current 1 sense resistor
+.meas isense_max max I(R5)
+*max power 1 sense resistor
+.meas psense_max param (isense_max*vsense_max)
+*
+*out monitor
+*
+*max voltage out monitor
+.meas vcocm_max max V(/cocm)
+*max current out monitor
+.meas icocm_max find -Ix(u4:OUT) when I(I1)=iload_max
